@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://vehicle-rental-management-system-backend-2udn.onrender.com',
   headers: {
     'Content-Type': 'application/json'
   }
