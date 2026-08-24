@@ -3,41 +3,75 @@
 @tailwind utilities;
 
 @layer base {
-  body {
+  html.dark body {
     background-color: #0B0F19;
+    color: #F8FAFC;
     background-image: 
       radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
       radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.08) 0px, transparent 50%),
       radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.06) 0px, transparent 50%);
     background-attachment: fixed;
   }
+
+  html.light body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.06) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.04) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
 }
 
-/* RTCROS Custom Glassmorphism Utility */
-.glass-card {
-  background: rgba(19, 27, 46, 0.7);
+/* RTCROS Custom Glassmorphism Utility (Light & Dark Compatible) */
+.dark .glass-card {
+  background: rgba(19, 27, 46, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
+.light .glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass-nav {
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.light .glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+/* Glass Card Hover Animations */
 .glass-card-hover {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-card-hover:hover {
+.dark .glass-card-hover:hover {
   transform: translateY(-4px);
-  background: rgba(26, 36, 61, 0.85);
-  border-color: rgba(99, 102, 241, 0.3);
+  background: rgba(26, 36, 61, 0.9);
+  border-color: rgba(99, 102, 241, 0.4);
   box-shadow: 0 12px 40px -10px rgba(99, 102, 241, 0.3);
 }
 
-.glass-nav {
-  background: rgba(11, 15, 25, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+.light .glass-card-hover:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 12px 35px -5px rgba(99, 102, 241, 0.15);
 }
 
 /* Neon Gradient Text */
@@ -60,22 +94,41 @@
   transform: scale(1.02);
 }
 
-.btn-neon::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(60deg, transparent, rgba(255,255,255,0.2), transparent);
-  transform: rotate(30deg);
-  transition: 0.8s;
-  opacity: 0;
+/* High Contrast Light Mode Text Rules */
+.light .text-white {
+  color: #0F172A !important;
 }
 
-.btn-neon:hover::after {
-  opacity: 1;
-  left: 100%;
+.light .text-slate-100 {
+  color: #0F172A !important;
+}
+
+.light .text-slate-200 {
+  color: #1E293B !important;
+}
+
+.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+.light .text-slate-400 {
+  color: #64748B !important;
+}
+
+.light .bg-slate-900 {
+  background-color: #F1F5F9 !important;
+}
+
+.light .bg-slate-950 {
+  background-color: #E2E8F0 !important;
+}
+
+.light .border-slate-800 {
+  border-color: #E2E8F0 !important;
+}
+
+.light .border-slate-700 {
+  border-color: #CBD5E1 !important;
 }
 
 /* Custom Scrollbar */
@@ -84,15 +137,15 @@
   height: 8px;
 }
 
-::-webkit-scrollbar-track {
+.dark ::-webkit-scrollbar-track {
   background: #0B0F19;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #1E293B;
-  border-radius: 4px;
+.light ::-webkit-scrollbar-track {
+  background: #F8FAFC;
 }
 
-::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb {
   background: #6366F1;
+  border-radius: 4px;
 }

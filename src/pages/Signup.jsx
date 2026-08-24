@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Zap, User, Mail, Lock, Phone, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
+import API from '../services/api';
+import { Zap, User, Mail, Lock, Phone, Eye, EyeOff, AlertCircle, ArrowRight, Building2, FileText } from 'lucide-react';
 
 const Signup = () => {
-  const { register } = useAuth();
   const navigate = useNavigate();
+  const [role, setRole] = useState('customer'); // 'customer' | 'provider'
 
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [shopName, setShopName] = useState('');
+  const [gstNumber, setGstNumber] = useState('');
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -19,19 +22,38 @@ const Signup = () => {
     e.preventDefault();
     setErrorMsg('');
 
+    if (!/^[0-9]{10}$/.test(phone.trim())) {
+      setErrorMsg('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
     if (password.length < 6) {
       setErrorMsg('Password must be at least 6 characters long.');
       return;
     }
 
-    setLoading(true);
-    const res = await register({ name, email, phone, password });
-    setLoading(false);
+    if (role === 'provider' && (!email || !shopName || !gstNumber)) {
+      setErrorMsg('Mandatory Email, Shop/Business Name, and GST Number are required for Providers.');
+      return;
+    }
 
-    if (res.success) {
-      navigate('/dashboard');
-    } else {
-      setErrorMsg(res.message);
+    try {
+      setLoading(true);
+      const endpoint = role === 'provider' ? '/auth/register-provider' : '/auth/register-customer';
+      const payload = role === 'provider'
+        ? { name, phone: phone.trim(), email, shopName, gstNumber, password }
+        : { name, phone: phone.trim(), email, password };
+
+      const res = await API.post(endpoint, payload);
+      if (res.data.success) {
+        localStorage.setItem('drivepulse_token', res.data.token);
+        localStorage.setItem('drivepulse_user', JSON.stringify(res.data.user));
+        window.location.href = res.data.user.role === 'provider' ? '/provider-dashboard' : '/dashboard';
+      }
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || 'Registration failed.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,7 +73,36 @@ const Signup = () => {
             </div>
           </div>
           <h2 className="text-2xl font-extrabold text-white">Create Member Account</h2>
-          <p className="text-xs text-slate-400">Join DrivePulse to unlock luxury fleet bookings and instant keys.</p>
+          <p className="text-xs text-slate-400">Join DrivePulse as a Renter or Registered Vehicle Provider.</p>
+        </div>
+
+        {/* Dual Role Selector Tabs */}
+        <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs">
+          <button
+            type="button"
+            onClick={() => setRole('customer')}
+            className={`py-2.5 rounded-xl font-bold transition-all flex items-center justify-center space-x-1.5 ${
+              role === 'customer'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>Customer Renter</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setRole('provider')}
+            className={`py-2.5 rounded-xl font-bold transition-all flex items-center justify-center space-x-1.5 ${
+              role === 'provider'
+                ? 'bg-pink-600 text-white shadow-md shadow-pink-500/25'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Vehicle Provider</span>
+          </button>
         </div>
 
         {errorMsg && (
@@ -64,7 +115,9 @@ const Signup = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Full Name</label>
+            <label className="text-xs font-semibold text-slate-300">
+              {role === 'provider' ? 'Owner / Business Representative Name' : 'Full Name'}
+            </label>
             <div className="relative">
               <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -73,13 +126,31 @@ const Signup = () => {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Alex Morgan"
                 required
-                className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Email Address</label>
+            <label className="text-xs font-semibold text-slate-300">Strict 10-Digit Mobile Number</label>
+            <div className="relative">
+              <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="9876543210"
+                maxLength={10}
+                required
+                className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-300">
+              Email Address {role === 'provider' ? <span className="text-pink-400 font-bold">(Mandatory for Providers)</span> : '(Optional)'}
+            </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -87,25 +158,46 @@ const Signup = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="alex@example.com"
-                required
-                className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                required={role === 'provider'}
+                className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Phone Number</label>
-            <div className="relative">
-              <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 (555) 019-2834"
-                className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-              />
-            </div>
-          </div>
+          {/* Provider Business Credentials */}
+          {role === 'provider' && (
+            <>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Shop / Business Name</label>
+                <div className="relative">
+                  <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={shopName}
+                    onChange={(e) => setShopName(e.target.value)}
+                    placeholder="Apex Mobility Garage"
+                    required
+                    className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">GST Registration Number</label>
+                <div className="relative">
+                  <FileText className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={gstNumber}
+                    onChange={(e) => setGstNumber(e.target.value)}
+                    placeholder="22AAAAA0000A1Z5"
+                    required
+                    className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300">Password</label>
@@ -138,7 +230,7 @@ const Signup = () => {
               <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                <span>Complete Registration</span>
+                <span>Complete {role === 'provider' ? 'Provider' : 'Customer'} Sign-Up</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -146,7 +238,7 @@ const Signup = () => {
         </form>
 
         <div className="text-center pt-2 border-t border-slate-800 text-xs text-slate-400">
-          Already have an account?{' '}
+          Already registered?{' '}
           <Link to="/login" className="text-pink-400 hover:text-pink-300 font-bold">
             Log In Here
           </Link>

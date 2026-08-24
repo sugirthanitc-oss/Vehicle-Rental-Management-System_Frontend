@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Zap, Car, User, LogOut, LayoutDashboard, Menu, X, Shield, ChevronDown } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { Zap, Car, User, LogOut, LayoutDashboard, Menu, X, Shield, ChevronDown, Building2, Sun, Moon } from 'lucide-react';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ const Navbar = () => {
   };
 
   const isActive = (path) => location.pathname === path;
+  const isProvider = user?.role === 'provider';
 
   return (
     <header className="sticky top-0 z-50 glass-nav transition-all duration-300">
@@ -49,22 +52,35 @@ const Navbar = () => {
             >
               Explore Fleet
             </Link>
-            <a
-              href="#how-it-works"
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors"
-            >
-              How It Works
-            </a>
-            <a
-              href="#features"
-              className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-colors"
-            >
-              Platform Perks
-            </a>
+            {isProvider && (
+              <Link
+                to="/provider-dashboard"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1 ${
+                  isActive('/provider-dashboard') ? 'text-pink-400 bg-pink-500/10' : 'text-pink-300 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <Building2 className="w-4 h-4 text-pink-400" />
+                <span>Provider Fleet Portal</span>
+              </Link>
+            )}
           </nav>
 
-          {/* Right Action / Auth State */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Right Action / Theme Toggle / Auth State */}
+          <div className="hidden md:flex items-center space-x-3">
+            
+            {/* Manual Light / Dark Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-full glass-card text-slate-300 hover:text-amber-400 transition-colors border border-slate-700/60"
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400 animate-spin-slow" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-600" />
+              )}
+            </button>
+
             {isAuthenticated ? (
               <div className="relative">
                 <button
@@ -78,26 +94,41 @@ const Navbar = () => {
                   />
                   <div className="text-left hidden lg:block">
                     <p className="text-xs font-semibold text-white leading-tight">{user?.name}</p>
-                    <p className="text-[10px] text-indigo-400">Authenticated Member</p>
+                    <p className="text-[10px] text-indigo-400 flex items-center gap-1">
+                      <span>{isProvider ? '⚡ Vehicle Provider' : '👤 Customer Renter'}</span>
+                    </p>
                   </div>
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl glass-card py-2 border border-slate-700/60 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute right-0 mt-2 w-60 rounded-2xl glass-card py-2 border border-slate-700/60 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="px-4 py-2.5 border-b border-slate-800">
-                      <p className="text-xs font-medium text-slate-400">Signed in as</p>
-                      <p className="text-xs font-semibold text-white truncate">{user?.email}</p>
+                      <p className="text-xs font-medium text-slate-400">Mobile Account</p>
+                      <p className="text-xs font-semibold text-white font-mono">+91 {user?.phone}</p>
                     </div>
-                    <Link
-                      to="/dashboard"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-medium text-slate-200 hover:bg-indigo-600/15 hover:text-indigo-400 transition-colors"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-indigo-400" />
-                      <span>My Reservations & Dashboard</span>
-                    </Link>
+
+                    {isProvider ? (
+                      <Link
+                        to="/provider-dashboard"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-medium text-pink-400 hover:bg-pink-600/15 transition-colors"
+                      >
+                        <Building2 className="w-4 h-4 text-pink-400" />
+                        <span>Provider Fleet Management</span>
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center space-x-2.5 px-4 py-2.5 text-xs font-medium text-indigo-400 hover:bg-indigo-600/15 transition-colors"
+                      >
+                        <LayoutDashboard className="w-4 h-4 text-indigo-400" />
+                        <span>My Customer Bookings</span>
+                      </Link>
+                    )}
+
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center space-x-2.5 px-4 py-2.5 text-xs font-medium text-pink-400 hover:bg-pink-500/10 transition-colors text-left"
@@ -127,8 +158,14 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="flex md:hidden items-center">
+          {/* Mobile menu & theme button */}
+          <div className="flex md:hidden items-center space-x-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-slate-800/60 text-slate-300"
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-indigo-600" />}
+            </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg bg-slate-800/60 text-slate-400 hover:text-white"
@@ -141,7 +178,7 @@ const Navbar = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden glass-card border-t border-slate-800 px-4 pt-2 pb-6 space-y-3 animate-in slide-in-from-top duration-200">
+        <div className="md:hidden glass-card border-t border-slate-800 px-4 pt-2 pb-6 space-y-3">
           <Link
             to="/"
             onClick={() => setMobileMenuOpen(false)}
@@ -151,13 +188,23 @@ const Navbar = () => {
           </Link>
           {isAuthenticated ? (
             <>
-              <Link
-                to="/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-lg text-sm font-medium text-indigo-400 hover:bg-slate-800"
-              >
-                User Dashboard & Bookings
-              </Link>
+              {isProvider ? (
+                <Link
+                  to="/provider-dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-lg text-sm font-medium text-pink-400 hover:bg-slate-800"
+                >
+                  Provider Fleet Portal
+                </Link>
+              ) : (
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-lg text-sm font-medium text-indigo-400 hover:bg-slate-800"
+                >
+                  Customer Bookings Hub
+                </Link>
+              )}
               <button
                 onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
                 className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-pink-400 hover:bg-slate-800"
