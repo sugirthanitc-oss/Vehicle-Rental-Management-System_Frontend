@@ -321,12 +321,12 @@ const Login = () => {
             ) : (
               <form onSubmit={handleResetPasswordSubmit} className="space-y-4 text-xs">
                 <div>
-                  <label className="font-semibold text-slate-300">Enter OTP (Demo OTP: 123456)</label>
+                  <label className="font-semibold text-slate-300">Enter 6-Digit OTP received via SMS</label>
                   <input
                     type="text"
                     value={resetOtp}
                     onChange={(e) => setResetOtp(e.target.value)}
-                    placeholder="123456"
+                    placeholder="Enter 6-digit OTP"
                     maxLength={6}
                     required
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white font-mono text-center text-sm mt-1"
