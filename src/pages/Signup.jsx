@@ -22,7 +22,8 @@ const Signup = () => {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!/^[0-9]{10}$/.test(phone.trim())) {
+    const cleanPhone = phone.trim();
+    if (!/^[0-9]{10}$/.test(cleanPhone)) {
       setErrorMsg('Please enter a valid 10-digit mobile number.');
       return;
     }
@@ -32,17 +33,30 @@ const Signup = () => {
       return;
     }
 
-    if (role === 'provider' && (!email || !shopName || !gstNumber)) {
-      setErrorMsg('Mandatory Email, Shop/Business Name, and GST Number are required for Providers.');
-      return;
+    if (role === 'provider') {
+      if (!email) {
+        setErrorMsg('Email address is mandatory for Vehicle Providers.');
+        return;
+      }
+      if (!shopName) {
+        setErrorMsg('Shop / Business Name is required for Vehicle Providers.');
+        return;
+      }
+      // Standard 15-character Indian GST Regex format
+      const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+      const formattedGst = gstNumber.trim().toUpperCase();
+      if (!gstRegex.test(formattedGst)) {
+        setErrorMsg('Invalid GST Registration Number format. Example: 22AAAAA0000A1Z5 (15 characters).');
+        return;
+      }
     }
 
     try {
       setLoading(true);
       const endpoint = role === 'provider' ? '/auth/register-provider' : '/auth/register-customer';
       const payload = role === 'provider'
-        ? { name, phone: phone.trim(), email, shopName, gstNumber, password }
-        : { name, phone: phone.trim(), email, password };
+        ? { name, phone: cleanPhone, email, shopName, gstNumber: gstNumber.trim().toUpperCase(), password }
+        : { name, phone: cleanPhone, email, password };
 
       const res = await API.post(endpoint, payload);
       if (res.data.success) {
@@ -73,14 +87,14 @@ const Signup = () => {
             </div>
           </div>
           <h2 className="text-2xl font-extrabold text-white">Create Member Account</h2>
-          <p className="text-xs text-slate-400">Join DrivePulse as a Renter or Registered Vehicle Provider.</p>
+          <p className="text-xs text-slate-400">Join DrivePulse Pro as a Customer or Verified Provider.</p>
         </div>
 
         {/* Dual Role Selector Tabs */}
         <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs">
           <button
             type="button"
-            onClick={() => setRole('customer')}
+            onClick={() => { setRole('customer'); setErrorMsg(''); }}
             className={`py-2.5 rounded-xl font-bold transition-all flex items-center justify-center space-x-1.5 ${
               role === 'customer'
                 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
@@ -93,7 +107,7 @@ const Signup = () => {
 
           <button
             type="button"
-            onClick={() => setRole('provider')}
+            onClick={() => { setRole('provider'); setErrorMsg(''); }}
             className={`py-2.5 rounded-xl font-bold transition-all flex items-center justify-center space-x-1.5 ${
               role === 'provider'
                 ? 'bg-pink-600 text-white shadow-md shadow-pink-500/25'
@@ -112,10 +126,10 @@ const Signup = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">
+            <label className="font-semibold text-slate-300">
               {role === 'provider' ? 'Owner / Business Representative Name' : 'Full Name'}
             </label>
             <div className="relative">
@@ -132,7 +146,7 @@ const Signup = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Strict 10-Digit Mobile Number</label>
+            <label className="font-semibold text-slate-300">Strict 10-Digit Mobile Number</label>
             <div className="relative">
               <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -148,7 +162,7 @@ const Signup = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">
+            <label className="font-semibold text-slate-300">
               Email Address {role === 'provider' ? <span className="text-pink-400 font-bold">(Mandatory for Providers)</span> : '(Optional)'}
             </label>
             <div className="relative">
@@ -168,7 +182,7 @@ const Signup = () => {
           {role === 'provider' && (
             <>
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">Shop / Business Name</label>
+                <label className="font-semibold text-slate-300">Shop / Business Name</label>
                 <div className="relative">
                   <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
@@ -183,16 +197,20 @@ const Signup = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">GST Registration Number</label>
+                <label className="font-semibold text-slate-300 flex justify-between">
+                  <span>GST Registration Number</span>
+                  <span className="text-pink-400 font-mono text-[10px]">15 Characters</span>
+                </label>
                 <div className="relative">
                   <FileText className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={gstNumber}
-                    onChange={(e) => setGstNumber(e.target.value)}
+                    onChange={(e) => setGstNumber(e.target.value.toUpperCase())}
                     placeholder="22AAAAA0000A1Z5"
+                    maxLength={15}
                     required
-                    className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+                    className="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono uppercase"
                   />
                 </div>
               </div>
@@ -200,7 +218,7 @@ const Signup = () => {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Password</label>
+            <label className="font-semibold text-slate-300">Password</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -224,13 +242,13 @@ const Signup = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full btn-neon py-3 rounded-xl text-xs font-bold text-white shadow-lg shadow-indigo-500/25 flex items-center justify-center space-x-2"
+            className="w-full btn-neon py-3.5 rounded-xl text-xs font-bold text-white shadow-lg shadow-indigo-500/25 flex items-center justify-center space-x-2 pt-3"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                <span>Complete {role === 'provider' ? 'Provider' : 'Customer'} Sign-Up</span>
+                <span>Complete {role === 'provider' ? 'Provider' : 'Customer'} Registration</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -240,7 +258,7 @@ const Signup = () => {
         <div className="text-center pt-2 border-t border-slate-800 text-xs text-slate-400">
           Already registered?{' '}
           <Link to="/login" className="text-pink-400 hover:text-pink-300 font-bold">
-            Log In Here
+            Sign In Here
           </Link>
         </div>
 
