@@ -17,16 +17,16 @@
     background-color: #F8FAFC;
     color: #0F172A;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.06) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.04) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.05) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.03) 0px, transparent 50%);
     background-attachment: fixed;
   }
 }
 
-/* RTCROS Custom Glassmorphism Utility (Light & Dark Compatible) */
+/* Glassmorphism Cards & Panels (Dual-Theme Adaptive) */
 .dark .glass-card {
-  background: rgba(19, 27, 46, 0.75);
+  background: rgba(19, 27, 46, 0.78);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -34,25 +34,25 @@
 }
 
 .light .glass-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.06);
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
 }
 
 .dark .glass-nav {
-  background: rgba(11, 15, 25, 0.85);
+  background: rgba(11, 15, 25, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .light .glass-nav {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  border-bottom: 1px solid #E2E8F0;
 }
 
 /* Glass Card Hover Animations */
@@ -62,16 +62,16 @@
 
 .dark .glass-card-hover:hover {
   transform: translateY(-4px);
-  background: rgba(26, 36, 61, 0.9);
+  background: rgba(26, 36, 61, 0.92);
   border-color: rgba(99, 102, 241, 0.4);
   box-shadow: 0 12px 40px -10px rgba(99, 102, 241, 0.3);
 }
 
 .light .glass-card-hover:hover {
   transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.98);
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 12px 35px -5px rgba(99, 102, 241, 0.15);
+  background: #FFFFFF;
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 14px 35px -5px rgba(99, 102, 241, 0.12);
 }
 
 /* Neon Gradient Text */
@@ -94,7 +94,7 @@
   transform: scale(1.02);
 }
 
-/* High Contrast Light Mode Text & Form Input Adaptations */
+/* Semantic Theme Fixes for Zero Mismatches */
 .light .text-white {
   color: #0F172A !important;
 }
@@ -123,6 +123,10 @@
   background-color: #E2E8F0 !important;
 }
 
+.light .bg-slate-800 {
+  background-color: #F8FAFC !important;
+}
+
 .light .border-slate-800 {
   border-color: #E2E8F0 !important;
 }
@@ -131,13 +135,14 @@
   border-color: #CBD5E1 !important;
 }
 
+/* Form Fields & Select Boxes */
 .light input, .light select, .light textarea {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
   border-color: #CBD5E1 !important;
 }
 
-.light input::placeholder {
+.light input::placeholder, .light textarea::placeholder {
   color: #94A3B8 !important;
 }
 
